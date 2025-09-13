@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Photobooth — Booth</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="booth-screen">
+  <main class="container">
+    <section class="left">
+      <div class="camera-wrap">
+        <video id="camera" autoplay playsinline></video>
+        <div id="countdown" class="countdown" style="display:none">3</div>
+      </div>
+      <div class="controls">
+        <button id="takeBtn" class="btn">take photo</button>
+        <label class="btn file-label" for="upload">upload photo</label>
+        <input id="upload" type="file" accept="image/*" multiple>
+      </div>
+      <p class="muted">Session will capture <strong>4</strong> photos automatically.</p>
+      <a class="btn small" href="index.html">back</a>
+    </section>
+  </main>
+  <canvas id="hiddenCanvas" width="320" height="240" style="display:none"></canvas>
+  <script src="booth.js"></script>
+</body>
+</html>
