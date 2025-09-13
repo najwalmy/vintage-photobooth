@@ -1,24 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Photobooth — Result</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Your Photostrip (⸝⸝> ᴗ•⸝⸝)⭑.ᐟ</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      margin: 2rem;
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    #stripCanvas {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      margin: 1rem 0;
+      background: black;
+    }
+    a {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border: 2px solid black;
+      background: white;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+    }
+    a:hover {
+      background: black;
+      color: white;
+    }
+  </style>
 </head>
-<body class="result-screen">
-  <main class="container">
-    <h2>your photostrip!</h2>
-    <div class="strip-area">
-      <canvas id="stripCanvas"></canvas>
-    </div>
-    <div class="controls">
-      <a id="downloadBtn" class="btn">⬇ download</a>
-      <button id="printBtn" class="btn">🖨 print</button>
-      <a class="btn" href="booth.html">↺ restart</a>
-    </div>
-    <footer class="muted">strip rendered with black edge</footer>
-  </main>
+<body>
+  <h2>Your Photostrip (⸝⸝> ᴗ•⸝⸝)⭑.ᐟ</h2>
+  <canvas id="stripCanvas"></canvas>
+  <div class="muted">Be your own version to smile!</div>
+  <div>
+    <a id="downloadBtn">⬇ Download</a>
+    <a href="booth.html" id="restartBtn">↻ Restart</a>
+  </div>
   <script src="result.js"></script>
 </body>
 </html>
