@@ -3,26 +3,240 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Photobooth — Booth</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Booth</title>
+  <style>
+    :root {
+      --accent:#111;
+      --muted:#666;
+    }
+    body.booth-screen {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      margin:0;
+      background:#f4f4f4;
+      font-family:sans-serif;
+    }
+    main.container { text-align:center; width:90%; max-width:980px; }
+
+    h2 {
+      font-size:1.6rem;
+      margin-bottom:1rem;
+      color:var(--accent);
+      font-weight:600;
+    }
+
+    .camera-wrap {
+      position:relative;
+      display:inline-block;
+      width:640px; height:480px;
+      border:3px solid var(--accent);  
+      border-radius:5px;
+      background:#000;
+      overflow:hidden;
+    }
+    video#camera {
+      width:100%; height:100%;
+      object-fit:cover;
+    }
+
+    .countdown {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:5rem; font-weight:800; color:#fff;
+      background:rgba(0,0,0,0.45);
+    }
+
+    .flash {
+      position:absolute; inset:0;
+      background:white; opacity:0;
+      pointer-events:none;
+    }
+
+    .progress {
+      margin-top:10px;
+      font-size:1.4rem;
+      letter-spacing:6px;
+      color:var(--accent);
+    }
+
+    .controls { margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .btn {
+      padding:8px 14px;
+      font-size:16px;
+      border:2px solid var(--accent);
+      border-radius:6px;
+      background:#fff; color:var(--accent);
+      cursor:pointer;
+      text-transform:none;
+      transition:transform 0.15s, background 0.2s, color 0.2s;
+    }
+    .btn:hover { background:var(--accent); color:#fff; }
+
+    .btn.shake { animation: shake 0.3s; }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
+    }
+
+    .muted { color:var(--muted); margin-top:10px; }
+    input[type=file]{ display:none; }
+
+    @media(max-width:760px){
+      .camera-wrap{ width:92vw; height:calc(92vw*3/4); }
+    }
+  </style>
 </head>
 <body class="booth-screen">
   <main class="container">
-    <section class="left">
-      <div class="camera-wrap">
-        <video id="camera" autoplay playsinline></video>
-        <div id="countdown" class="countdown" style="display:none">3</div>
-      </div>
-      <div class="controls">
-        <button id="takeBtn" class="btn">take photo</button>
-        <label class="btn file-label" for="upload">upload photo</label>
-        <input id="upload" type="file" accept="image/*" multiple>
-      </div>
-      <p class="muted">Session will capture <strong>4</strong> photos automatically.</p>
-      <a class="btn small" href="index.html">back</a>
-    </section>
+    <h2>Take Your Photos ദ്ദി(˵ •̀ ᴗ - ˵ )</h2>
+
+    <div class="camera-wrap">
+      <video id="camera" autoplay playsinline></video>
+      <div id="countdown" class="countdown" style="display:none">3</div>
+      <div id="flash" class="flash"></div>
+    </div>
+
+    <div id="progress" class="progress">○ ○ ○ ○</div>
+
+    <div class="controls">
+      <button id="takeBtn" class="btn">Start</button>
+      <label for="upload" class="btn">Upload (Choose 4)</label>
+      <input id="upload" type="file" accept="image/*" multiple>
+      <a href="index.html" class="btn">Back</a>
+    </div>
+    <p class="muted">Session will capture <strong>4</strong> photos automatically.</p>
   </main>
+
   <canvas id="hiddenCanvas" width="320" height="240" style="display:none"></canvas>
-  <script src="booth.js"></script>
+  <audio id="snapSound" src="https://actions.google.com/sounds/v1/camera/camera_click.ogg" preload="auto"></audio>
+
+  <script>
+  (async function(){
+    const video=document.getElementById('camera');
+    const takeBtn=document.getElementById('takeBtn');
+    const uploadInput=document.getElementById('upload');
+    const countdownEl=document.getElementById('countdown');
+    const canvas=document.getElementById('hiddenCanvas');
+    const ctx=canvas.getContext('2d');
+    const flash=document.getElementById('flash');
+    const snapSound=document.getElementById('snapSound');
+    const progressEl=document.getElementById('progress');
+
+    const TARGET_W=320, TARGET_H=240, TOTAL_SHOTS=4;
+    let stream=null;
+
+    async function startCamera(){
+      try{
+        stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});
+        video.srcObject=stream; await video.play();
+      }catch(e){ alert("Camera error"); }
+    }
+    function stopCamera(){ if(stream){stream.getTracks().forEach(t=>t.stop()); stream=null;} }
+
+    function applyVintage(){
+      const img=ctx.getImageData(0,0,TARGET_W,TARGET_H);
+      const d=img.data;
+      for(let i=0;i<d.length;i+=4){
+        let l=(d[i]+d[i+1]+d[i+2])/3;
+        let v=(l-128)*1.4+128; v=v*0.95;
+        v=Math.max(0,Math.min(255,v));
+        d[i]=d[i+1]=d[i+2]=v;
+      }
+      ctx.putImageData(img,0,0);
+    }
+
+    function countdown(n){
+      return new Promise(res=>{
+        countdownEl.style.display="flex"; countdownEl.textContent=n;
+        let cur=n;
+        const id=setInterval(()=>{
+          cur--;
+          if(cur<=0){ clearInterval(id); countdownEl.style.display="none"; res(); }
+          else{ countdownEl.textContent=cur; }
+        },1000);
+      });
+    }
+
+    function flashEffect(){
+      flash.style.transition="none"; flash.style.opacity=1;
+      snapSound.currentTime=0; snapSound.play();
+      takeBtn.classList.add("shake");
+      setTimeout(()=>takeBtn.classList.remove("shake"),300);
+      requestAnimationFrame(()=>{
+        flash.style.transition="opacity 0.5s"; flash.style.opacity=0;
+      });
+    }
+
+    function drawSource(src,w,h){
+      const r=w/h, tr=TARGET_W/TARGET_H;
+      let sx=0,sy=0,sw=w,sh=h;
+      if(r>tr){ sh=h; sw=Math.round(sh*tr); sx=Math.round((w-sw)/2); }
+      else{ sw=w; sh=Math.round(sw/tr); sy=Math.round((h-sh)/2); }
+      ctx.drawImage(src,sx,sy,sw,sh,0,0,TARGET_W,TARGET_H);
+    }
+
+    function updateProgress(count){
+      let dots=[];
+      for(let i=0;i<TOTAL_SHOTS;i++){
+        dots.push(i<count? "●":"○");
+      }
+      progressEl.textContent=dots.join(" ");
+    }
+
+    async function takeSequence(){
+      const shots=[];
+      for(let i=0;i<TOTAL_SHOTS;i++){
+        await countdown(3);
+        ctx.clearRect(0,0,TARGET_W,TARGET_H);
+        drawSource(video,video.videoWidth,video.videoHeight);
+        applyVintage();
+        flashEffect();
+        shots.push(canvas.toDataURL("image/png"));
+        updateProgress(i+1);
+        await new Promise(r=>setTimeout(r,400));
+      }
+      localStorage.setItem("photobooth_shots",JSON.stringify(shots));
+      stopCamera(); window.location="result.html";
+    }
+
+    function handleUpload(e){
+      const files=[...e.target.files].slice(0,TOTAL_SHOTS);
+      if(!files.length) return;
+      const shots=[];
+      let loaded=0;
+      files.forEach(file=>{
+        const reader=new FileReader();
+        reader.onload=()=>{
+          const img=new Image();
+          img.onload=()=>{
+            ctx.clearRect(0,0,TARGET_W,TARGET_H);
+            drawSource(img,img.width,img.height);
+            applyVintage();
+            shots.push(canvas.toDataURL("image/png"));
+            loaded++;
+            updateProgress(loaded);
+            if(loaded===files.length){
+              localStorage.setItem("photobooth_shots",JSON.stringify(shots));
+              stopCamera(); window.location="result.html";
+            }
+          };
+          img.src=reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    takeBtn.addEventListener("click",takeSequence);
+    uploadInput.addEventListener("change",handleUpload);
+
+    startCamera();
+    window.addEventListener("beforeunload",stopCamera);
+  })();
+  </script>
 </body>
 </html>
