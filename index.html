@@ -2,13 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photobooth — Home</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body.home-screen {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+    }
+
+    .booth-art h1 {
+      font-size: 3rem;
+      letter-spacing: 4px;
+      margin-bottom: 1rem;
+      color: #222;
+    }
+
+    .booth-art .muted {
+      color: #777;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn.enter {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      border-radius: 30px;
+      background: #000;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      border: 2px solid #fff;
+      transition: all 0.3s ease;
+    }
+
+    .btn.enter:hover {
+      background: #fff;
+      color: #000;
+      transform: translateY(-2px);
+    }
+
+    footer.muted {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    .photobooth-illustration img {
+      margin: 2rem auto;
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+      filter: grayscale(100%);
+      display: block;
+    }
+  </style>
 </head>
 <body class="home-screen">
   <main class="container">
     <header class="booth-art">
       <h1>PHOTOBOOTH</h1>
+      <div class="photobooth-illustration">
+        <img src="img.jpeg" alt="">
+      </div>
       <p class="muted">Vintage B/W Photobooth — Press Enter to begin</p>
       <a class="btn enter" href="booth.html">Enter →</a>
     </header>
