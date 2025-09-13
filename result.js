@@ -10,7 +10,7 @@
   }
 
   const frameW = 320, frameH = 240, frames = 4, seam = 6;
-  const border = 12; // edge / padding luar
+  const border = 12; 
   const canvas = document.getElementById('stripCanvas');
   const ctx = canvas.getContext('2d');
 
@@ -19,11 +19,9 @@
   canvas.width = canvasW;
   canvas.height = canvasH;
 
-  // latar belakang hitam penuh
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvasW, canvasH);
 
-  // gambar setiap foto dengan offset border
   for (let i = 0; i < frames; i++) {
     await new Promise(res => {
       const img = new Image();
@@ -37,18 +35,15 @@
     });
   }
 
-  // gambar edge hitam (supaya pasti muncul di PNG)
   ctx.lineWidth = border;
   ctx.strokeStyle = "black";
   ctx.strokeRect(border / 2, border / 2, canvasW - border, canvasH - border);
 
-  // tombol download
   document.getElementById('downloadBtn').addEventListener('click', e => {
     e.target.href = canvas.toDataURL('image/png');
     e.target.download = 'photostrip.png';
   });
 
-  // tombol print
   document.getElementById('printBtn').addEventListener('click', () => {
     const url = canvas.toDataURL('image/png');
     const w = window.open('');
@@ -57,3 +52,4 @@
     w.print();
   });
 })();
+
